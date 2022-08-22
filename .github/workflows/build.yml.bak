@@ -17,4 +17,5 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: ${{ matrix.go_version }}
+          go-version-file: './src/go.mod'
+      - run: go version
