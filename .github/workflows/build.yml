@@ -1,0 +1,23 @@
+name: blog-service
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  docker-build:
+    name: DockerBuildandImageScanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build an image from Dockerfile
+        run: |
+          docker build . --file Dockerfile --tag blog-service/demo:v1
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: './src/go.mod'
+      - run: go version
+      - name: Test
+        run: go test -v ./...
