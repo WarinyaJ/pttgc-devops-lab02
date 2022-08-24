@@ -23,7 +23,7 @@ jobs:
       - name: Unittest
         working-directory: ./src
         run: |
-             go test -v ./...
+             go test -coverpkg "./src/blog" "./src/cmd" "./src/healthcheck" "./src" -coverprofile coverage.out
              go tool cover -func coverage.out -o coverage.txt
              cat coverage.txt
 
