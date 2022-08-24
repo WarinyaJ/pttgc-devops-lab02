@@ -1,4 +1,4 @@
-name: blog-service
+name: pttgc-devops-lab02
 on:
   push:
     branches:
@@ -6,29 +6,77 @@ on:
 
 jobs:
 
-  docker-build:
-    name: DockerBuildandTest
+  unittest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: Build an image from Dockerfile
-        run: |
-          docker build . --file Dockerfile --tag blog-service/demo:v1
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
+      - uses: actions/setup-go@v3
         with:
           go-version-file: './src/go.mod'
-
-      - run: go version
-#      - uses: actions/checkout@v3
-
-      - name: Unittest
+      - run: go mod tidy
         working-directory: ./src
+      - run: go test ./...
+        working-directory: ./src
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: './src/go.mod'
+      - run: go mod tidy
+        working-directory: ./src
+        name: Download libraries
+      - run: go test -coverprofile coverage.out ./...
+        working-directory: ./src
+        name: Code Coverage Checking
+      - run: go tool cover -func coverage.out -o coverage.txt
+        working-directory: ./src
+        name: Convert Code Coverage Report format
+      - uses: actions/upload-artifact@v3
+        name: Store code coverage report 
+        with:
+          name: code-coverage-report
+          path: src/coverage.txt
+  
+  code-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL'
+      - uses: actions/upload-artifact@v3
+        with:
+          name: code-scan-result
+          path: trivy-results.sarif
+
+  quality-gate:
+    runs-on: ubuntu-latest
+    needs: ["coverage", "unittest"]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: code-coverage-report
+          path: ./src
+      - run: python coverage.py 1
+        working-directory: ./src
+        name: Simple Quality Gate
+  
+  docker-build:
+    name: DockerBuildandImageScanning
+    runs-on: ubuntu-latest
+    needs: [quality-gate]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build an image from Dockerfile
         run: |
-             go test -v -coverprofile coverage.out ./... 
-             go tool cover -func coverage.out -o coverage.txt
-             cat coverage.txt
+          docker build . --file Dockerfile --tag pttgc-devops-lab02/demo:${{ github.sha }}
 
         
