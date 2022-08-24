@@ -23,7 +23,8 @@ jobs:
       - name: Unittest
         working-directory: src
         run: |
-             go test -v ./... -coverprofile=coverage.out 
+             go test -v ./...
+             go test -coverprofile coverage.out
              go tool cover -func coverage.out -o coverage.txt
              cat coverage.txt
 
