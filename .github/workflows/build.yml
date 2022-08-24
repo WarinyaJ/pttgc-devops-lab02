@@ -70,9 +70,9 @@ jobs:
         name: Simple Quality Gate
   
   docker-build:
-    name: DockerBuildandImageScanning
+    name: DockerBuild
     runs-on: ubuntu-latest
-    needs: [quality-gate]
+    needs: ["quality-gate", "code-scan"]
     steps:
       - uses: actions/checkout@v3
       - name: Build an image from Dockerfile
