@@ -14,6 +14,16 @@ jobs:
       - name: Build an image from Dockerfile
         run: |
           docker build . --file Dockerfile --tag blog-service/demo:v1
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{secrets.DOCKERHUB_USERNAME}}/demo:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          security-checks: 'vuln'
+          severity: 'CRITICAL,HIGH'
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
@@ -23,7 +33,7 @@ jobs:
       - name: Unittest
         working-directory: ./src
         run: |
-             go test -coverpkg "./src/blog" "./src/cmd" "./src/healthcheck" "./src" -coverprofile coverage.out
+             go test -coverpkg "./blog" "./cmd" "./healthcheck" "./" -coverprofile coverage.out
              go tool cover -func coverage.out -o coverage.txt
              cat coverage.txt
 
