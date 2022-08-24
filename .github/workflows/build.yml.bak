@@ -19,4 +19,11 @@ jobs:
         with:
           go-version-file: './src/go.mod'
       - run: go version
-      - run: go mod init ./src/go.mod
+#      - uses: actions/checkout@v3
+      - name: Unittest
+        working-directory: ./src
+        run: |
+             go test -v ./... -coverprofile=coverage.out 
+             go test cover -func coverage.out -o coverage.txt
+
+        
