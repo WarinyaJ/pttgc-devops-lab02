@@ -140,7 +140,7 @@ You can see that we have multiple jobs running simultanousely to ensure the code
 ```yaml
     quality-gate:
         runs-on: ubuntu-latest
-        needs: ["coverage", "unittest", "code-vuln-scan"]
+        needs: ["code-coverage", "unittest", "code-vuln-scan"]
         steps:
         - uses: actions/checkout@v3
         - uses: actions/download-artifact@v3
@@ -171,7 +171,7 @@ This exercise will build the docker container image. However, since we haven't t
   docker-build:
     name: DockerBuild
     runs-on: ubuntu-latest
-    needs: ["quality-gate", "code-scan"]
+    needs: ["quality-gate", "code-vuln-scan"]
     steps:
       - uses: actions/checkout@v3
       - name: Build an image from Dockerfile
