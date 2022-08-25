@@ -71,10 +71,13 @@ Code coverage is the main factor to ensure the software quality, even we have in
               with:
                 go-version-file: ./src/go.mod
             - name: Run Code Coverage checking
+              working-directory: ./src
               run: go test -coverprofile coverage.out ./...
             - name: Reformat coverage report
+              working-directory: ./src
               run: go tool cover -func coverage.out -o coverage.txt
             - name: Print out report
+              working-directory: ./src
               run: cat coverage.txt
 ```
 
